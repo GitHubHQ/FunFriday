@@ -12,6 +12,7 @@ import QuartzCore
 
 class ViewController: UIViewController {
     
+    @IBOutlet weak var startBtn: UIButton!
     var started: Bool = false;
     
     var updater: CADisplayLink!
@@ -42,60 +43,70 @@ class ViewController: UIViewController {
         
         
     }
+    @IBAction func tapped(_ sender: Any) {
+        tapEvent()
+    }
     
-
-    @IBAction func longPressAction(sender: UILongPressGestureRecognizer) {
+    @IBAction func longPressed(_ sender: Any) {
+        longPressAction((sender as? UILongPressGestureRecognizer)!)
+    }
+    
+    func longPressAction(_ sender: UILongPressGestureRecognizer) {
         pressed = true
-        let point: CGPoint = sender.locationOfTouch(sender.numberOfTouches()-1, inView: sender.view)
+        let point: CGPoint = sender.location(ofTouch: sender.numberOfTouches-1, in: sender.view)
         self.pX = point.x
         self.pY = point.y
         
         for i in 0..<enemies.count{
-            enemies[i].updateLoc(self.pX, playerY: self.pY, mass: 50)
+            enemies[i].updateLoc(playerX: self.pX, playerY: self.pY, mass: 50)
         }
 
         
     }
     
     
-    @IBAction func startGame(sender: UIButton) {
-        let circlePath = UIBezierPath(arcCenter: CGPoint(x: CGRectGetMidX(self.view.bounds), y: CGRectGetMidY(self.view.bounds) ), radius: CGFloat(5), startAngle: CGFloat(0), endAngle:CGFloat(M_PI * 2), clockwise: true)
+    @IBAction func start(_ sender: Any) {
+        startGame()
+    }
+    
+    func startGame() {
+        let circlePath = UIBezierPath(arcCenter: CGPoint(x: self.view.bounds.midX, y: self.view.bounds.midY ), radius: CGFloat(5), startAngle: CGFloat(0), endAngle:CGFloat(Double.pi * 2), clockwise: true)
         
-        let mini = UIBezierPath(arcCenter: CGPoint(x: CGRectGetMidX(self.view.bounds)-10, y: CGRectGetMidX(self.view.bounds)-10 ), radius: CGFloat(5), startAngle: CGFloat(0), endAngle:CGFloat(M_PI * 2), clockwise: true)
+        let mini = UIBezierPath(arcCenter: CGPoint(x: self.view.bounds.midX-10, y: self.view.bounds.midY-10 ), radius: CGFloat(5), startAngle: CGFloat(0), endAngle:CGFloat(Double.pi * 2), clockwise: true)
         
         
-        let goalPath = UIBezierPath(arcCenter: CGPoint(x: CGRectGetMidX(self.view.bounds), y: CGRectGetMidY(self.view.bounds) ), radius: CGFloat(200), startAngle: CGFloat(0), endAngle:CGFloat(M_PI * 2), clockwise: true)
+        let goalPath = UIBezierPath(arcCenter: CGPoint(x: self.view.bounds.midX, y: self.view.bounds.midY ), radius: CGFloat(200), startAngle: CGFloat(0), endAngle:CGFloat(Double.pi * 2), clockwise: true)
         
         let goal = CAShapeLayer();
-        goal.path = goalPath.CGPath;
-        goal.fillColor = UIColor.clearColor().CGColor
-        goal.strokeColor = UIColor.yellowColor().CGColor
+        goal.path = goalPath.cgPath;
+        goal.fillColor = UIColor.clear.cgColor
+        goal.strokeColor = UIColor.yellow.cgColor
         goal.borderWidth = 1
         self.view.layer.addSublayer(goal)
 
         self.shapejr = CAShapeLayer();
-        self.shapejr.path = mini.CGPath
-        self.shapejr.fillColor = UIColor.greenColor().CGColor
+        self.shapejr.path = mini.cgPath
+        self.shapejr.fillColor = UIColor.green.cgColor
         self.view.layer.addSublayer(shapejr)
         
     
 
         
         self.shapeLayer = CAShapeLayer()
-        self.shapeLayer.path = circlePath.CGPath
-        self.shapeLayer.fillColor = UIColor.cyanColor().CGColor
+        self.shapeLayer.path = circlePath.cgPath
+        self.shapeLayer.fillColor = UIColor.cyan.cgColor
         self.view.layer.addSublayer(self.shapeLayer)
         
-        self.updater = CADisplayLink(target: self, selector: #selector(ViewController.gameLoop))
+        self.updater = CADisplayLink(target: self, selector: #selector(gameLoop))
         self.updater.frameInterval = 1
-        self.updater.addToRunLoop(NSRunLoop.currentRunLoop(), forMode: NSRunLoopCommonModes)
+        self.updater.add(to: RunLoop.current, forMode: RunLoop.Mode.common)
         
         for i in 0...100{
             let test = BadBall.init()
-            let pathz = UIBezierPath(arcCenter: test.location, radius: CGFloat(5), startAngle: CGFloat(0), endAngle:CGFloat(M_PI * 2), clockwise: true)
+            let pathz = UIBezierPath(arcCenter: test.location, radius: CGFloat(5), startAngle: CGFloat(0), endAngle:CGFloat(Double.pi * 2), clockwise: true)
             let shap = CAShapeLayer()
-            shap.path = pathz.CGPath
-            shap.fillColor = UIColor.redColor().CGColor
+            shap.path = pathz.cgPath
+            shap.fillColor = UIColor.red.cgColor
             self.view.layer.addSublayer(shap)
             enemies.append(test)
             enemyShapes.append(shap)
@@ -104,19 +115,19 @@ class ViewController: UIViewController {
         
         mass=0
         
-        self.label = UILabel(frame: CGRectMake(0, 0, 200, 20))
+        self.label = UILabel(frame: CGRect(x:0, y:0, width:200, height:20))
         self.label.center = self.view.center
-        self.label.text = String(mass)
+        self.label.text = "\(mass)"
         self.view.addSubview(self.label)
         
-        sWidth = UIScreen.mainScreen().bounds.size.width
-        sHeight = UIScreen.mainScreen().bounds.size.height
+        sWidth = UIScreen.main.bounds.size.width
+        sHeight = UIScreen.main.bounds.size.height
         
         xV = CGFloat(arc4random_uniform(2)+3)
         yV = CGFloat(arc4random_uniform(2)+3)
 
 
-        sender.hidden = true
+        startBtn.isHidden = true
         self.started = true
 
     }
@@ -125,34 +136,34 @@ class ViewController: UIViewController {
         // Dispose of any resources that can be recreated.
     }
     
-    @IBAction func tapEvent(sender: AnyObject) {
+    func tapEvent() {
         if(started){
             polarity = polarity * -1
         }
     }
-    func gameLoop(){
+    @objc func gameLoop(){
         y = y + polarity*10
         if(mass > 0 || polarity < 0){
-            self.label.text = String(round(100*mass)/100);
+            self.label.text = "\(round(100*mass)/100)";
             mass = mass - polarity
             if(mass > 100){
                 mass = 100
             }
-            let circlePath = UIBezierPath(arcCenter: CGPoint(x: CGRectGetMidX(self.view.bounds), y: CGRectGetMidY(self.view.bounds) ), radius: CGFloat(5), startAngle: CGFloat(0), endAngle:CGFloat(M_PI * 2), clockwise: true)
-            self.shapeLayer.path = circlePath.CGPath;
+            let circlePath = UIBezierPath(arcCenter: CGPoint(x: self.view.bounds.midX, y: self.view.bounds.midY ), radius: CGFloat(5), startAngle: CGFloat(0), endAngle:CGFloat(Double.pi * 2), clockwise: true)
+            self.shapeLayer.path = circlePath.cgPath;
         }else{
             self.label.text = "0.0"
         }
-        let miniPath = UIBezierPath(arcCenter: CGPoint(x: CGRectGetMidX(self.view.bounds) + mass*2*cos(y/18), y: CGRectGetMidY(self.view.bounds) + 2*mass*sin(y/18) ), radius: CGFloat(10), startAngle: CGFloat(0), endAngle:CGFloat(M_PI * 2), clockwise: true)
-        self.shapejr.path = miniPath.CGPath
+        let miniPath = UIBezierPath(arcCenter: CGPoint(x: self.view.bounds.midX + mass*2*cos(y/18), y: self.view.bounds.midY + 2*mass*sin(y/18) ), radius: CGFloat(10), startAngle: CGFloat(0), endAngle:CGFloat(Double.pi * 2), clockwise: true)
+        self.shapejr.path = miniPath.cgPath
 
         for i in 0..<enemies.count{
-            enemies[i].updateLoc(miniPath.bounds.origin.x,playerY: miniPath.bounds.origin.y, mass: 10)
-            let evilPath = UIBezierPath(arcCenter: enemies[i].location, radius: CGFloat(5), startAngle: CGFloat(0), endAngle:CGFloat(M_PI * 2), clockwise: true)
-            enemyShapes[i].path = evilPath.CGPath
-            let p = self.shapejr.presentationLayer() as? CAShapeLayer ?? self.shapejr
-            if (CGPathContainsPoint(p?.path, nil, evilPath.bounds.origin, false)){
-                //print("I touched you!")
+            enemies[i].updateLoc(playerX: miniPath.bounds.origin.x,playerY: miniPath.bounds.origin.y, mass: 10)
+            let evilPath = UIBezierPath(arcCenter: enemies[i].location, radius: CGFloat(5), startAngle: CGFloat(0), endAngle:CGFloat(Double.pi * 2), clockwise: true)
+            enemyShapes[i].path = evilPath.cgPath
+            let p = self.shapejr.presentation() ?? self.shapejr
+            if ((p?.path?.contains(evilPath.bounds.origin))!){
+//                print("I touched you!")
             }
         }
             

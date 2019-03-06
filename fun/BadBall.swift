@@ -22,10 +22,10 @@ class BadBall{
     var sHeight: UInt32 = 0
     
     init(){
-        self.sWidth = UInt32(UIScreen.mainScreen().bounds.size.width)
-        self.sHeight = UInt32(UIScreen.mainScreen().bounds.size.height)
+        self.sWidth = UInt32(UIScreen.main.bounds.size.width)
+        self.sHeight = UInt32(UIScreen.main.bounds.size.height)
         
-        self.location = CGPointMake(CGFloat(arc4random_uniform(self.sWidth)), CGFloat(arc4random_uniform(sHeight)))
+        self.location = CGPoint(x: CGFloat(arc4random_uniform(self.sWidth)), y: CGFloat(arc4random_uniform(sHeight)))
         self.xV = 0
         self.yV = 0
  
@@ -36,7 +36,7 @@ class BadBall{
     func updateLoc(playerX: CGFloat, playerY: CGFloat, mass: Int){
         
         //update acceleration
-        updateAccel(playerX, y: playerY, mass: mass)
+        updateAccel(x: playerX, y: playerY, mass: mass)
         xV += dVX
         yV += dVY
         
